@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en" data-framework="knockoutjs">
+	<head>
+		<meta charset="utf-8">
+		<title>Visit Planner</title>
+		<link rel="stylesheet" href="css/main.css">
+	</head>
+	<body>
+		<section id="menu">
+			<h1>Visit Planner</h1>
+			<p>Welcome! This app allows users to tag locations of interest when visiting a new city.</p>
+			<div>
+	        	<input id="show-listings" type="button" value="Show All">
+	         	<input id="hide-listings" type="button" value="Hide All">
+	        </div> 
+	        <div>
+	        	<h2>Type:</h2>
+	        	<select id="neighborhood">
+	        		<option value="culture">Culture</option>
+	        		<option value="dining">Dining</option>
+	        		<option value="history">History</option>
+	        		<option value="nightlife">Nightlife</option>	        		
+	        		<option value="other">Other</option>
+	          	</select>
+	        </div>
+	        <div>
+	        	<h2>Neighborhood:</h2>
+	        	<select id="neighborhood">
+	          	</select>
+	        </div>
+	        <div id="list">
+	        </div>
+		</section>
+		<section id="map">
+			<h1 id="map-message"></h1>
+		</section>
+		<footer>
+		</footer>
+		<script async defer src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyC6RN_lR9ibSYq3jCi9f4cLYxOrqa5yuuQ&v=3&callback=initMap" onerror="errorMap()"></script>
+		<script src="js/lib/knockout-3.4.2.js"></script>
+		<script src="js/lib/jquery-3.2.1.min.js"></script>
+		<script src="js/app.js"></script>	    
+	</body>
+</html>
