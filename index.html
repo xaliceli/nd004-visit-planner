@@ -6,37 +6,33 @@
 		<link rel="stylesheet" href="css/main.css">
 	</head>
 	<body>
+		<!-- Map element wrapper allows map to remain fixed while menu scrolls -->
+		<section id="map-wrapper"> 
+			<h1 id="map-message"></h1>
+			<div id="map"></div>
+		</section>
 		<section id="menu">
 			<h1>Visit Planner</h1>
 			<p>Welcome! This app allows users to tag locations of interest when visiting a new city.</p>
 			<div>
-	        	<input id="show-listings" type="button" value="Show All">
-	         	<input id="hide-listings" type="button" value="Hide All">
+	        	<input id="show-all" type="button" value="Show Markers">
+	         	<input id="hide-all" type="button" value="Hide Markers">
 	        </div> 
 	        <div>
 	        	<h2>Type:</h2>
-	        	<select id="neighborhood">
-	        		<option value="culture">Culture</option>
-	        		<option value="dining">Dining</option>
-	        		<option value="history">History</option>
-	        		<option value="nightlife">Nightlife</option>	        		
-	        		<option value="other">Other</option>
+	        	<select id="category" data-bind="options: filters, value: filter, event: {change: updateMarkers}">
 	          	</select>
 	        </div>
-	        <div>
-	        	<h2>Neighborhood:</h2>
-	        	<select id="neighborhood">
-	          	</select>
+	        <div id="list" data-bind="foreach: filteredLocations">
+	        	<h3 data-bind="text: name"></h3>
+	        	<h4 data-bind="text: category"></h4>
+	        	<p data-bind="text: address"></p>	        	
+	        	<p data-bind="text: description"></p>
 	        </div>
-	        <div id="list">
-	        </div>
-		</section>
-		<section id="map">
-			<h1 id="map-message"></h1>
 		</section>
 		<footer>
 		</footer>
-		<script async defer src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyC6RN_lR9ibSYq3jCi9f4cLYxOrqa5yuuQ&v=3&callback=initMap" onerror="errorMap()"></script>
+		<script async defer src="https://maps.googleapis.com/maps/api/js?libraries=places,geometry,drawing&key=AIzaSyC6RN_lR9ibSYq3jCi9f4cLYxOrqa5yuuQ&v=3&callback=initMap" onerror="errorMap()"></script>
 		<script src="js/lib/knockout-3.4.2.js"></script>
 		<script src="js/lib/jquery-3.2.1.min.js"></script>
 		<script src="js/app.js"></script>	    
