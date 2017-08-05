@@ -13,13 +13,15 @@
 		</section>
 		<section id="menu">
 			<h1>Visit Planner</h1>
-			<p>Welcome! This app allows users to tag locations of interest when visiting a new city.</p>
+			<p>Welcome! This app shows locations of interest for a city.</p>
+			<p id="wiki-error"></p>
 			<div>
 	        	<input id="show-all" type="button" value="Show Markers">
 	         	<input id="hide-all" type="button" value="Hide Markers">
 	        </div> 
+	        <br>
 	        <div>
-	        	<h2>Type:</h2>
+	        	<span>Type:</span>
 	        	<select id="category" data-bind="options: filters, value: filter, event: {change: updateMarkers}">
 	          	</select>
 	        </div>

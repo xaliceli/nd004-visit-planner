@@ -2,10 +2,15 @@
 // Model
 //---------------------------------
 
-// Initialize locations for markers
+// Define locations for markers
+var locationCategories = ['All', 'Culture', 'Dining', 'Nightlife', 'Other'];
+
 var initialLocations = [
-    {name: 'Tresor', address: 'Köpenicker Str. 70, 10179 Berlin, Germany', category: 'Nightlife'},
-    {name: 'Berghain', address: 'Am Wriezener Bahnhof, 10243 Berlin, Germany', category: 'Nightlife'}
+    {name: 'Tresor', address: 'Köpenicker Str. 70, 10179 Berlin, Germany', category: 'Nightlife', description: ''},
+    {name: 'Berghain', address: 'Am Wriezener Bahnhof, 10243 Berlin, Germany', category: 'Nightlife', description: ''},
+    {name: 'East Side Gallery', address: 'Mühlenstraße, 10243 Berlin, Germany', category: 'Culture', description: ''},
+    {name: 'Pergamon Museum', address: 'Pergamonmuseum, 10117 Berlin, Germany', category: 'Culture', description: ''},
+    {name: 'Kaufhaus des Westens', address: 'Tauentzienstraße 21-24, 10789 Berlin, Germany', category: 'Dining', description: ''}    
 ];
 
 // Initialize blank array for visible markers 
@@ -21,6 +26,7 @@ var geocoder;
 
 function initMap() {
 
+
 	// Initialize map
 	map = new google.maps.Map(document.getElementById('map'), {
 		center: {lat: 52.5200, lng: 13.4050},
@@ -34,26 +40,25 @@ function initMap() {
 		var address = initialLocations[i].address;
 		var name = initialLocations[i].name;
 		var category = initialLocations[i].category;
-
-		wikiAPI(name);
-
+		
 		geocodeMarker(address, name, category);
+	}
 
-	};
-
+	// Show all markers
 	document.getElementById('show-all').addEventListener('click', function() {
 		showMarkers(viewMarkers);
 	});
 
+	// Hide all markers
 	document.getElementById('hide-all').addEventListener('click', function() {
 		hideMarkers(viewMarkers);
 	});
-};
+}
 
-// Error handler for API load issues
+// Error handler for Google Maps API load issues
 function errorMap() {
-	$('#map-message').text('Error: API did not return data.')
-};
+	$('#map-message').text('Error: API did not return data.');
+}
 
 // Loop through the markers and show them all
 function showMarkers(markers) {
@@ -64,15 +69,16 @@ function showMarkers(markers) {
 		bounds.extend(markers[i].position);
 	}
 	map.fitBounds(bounds);
-};
+}
 
 // Loop through the markers and hide them all
 function hideMarkers(markers) {
 	for (var i = 0; i < markers.length; i++) {
 		markers[i].setMap(null);
 	}
-};
+}
 
+// Create marker by geocoding address into latlong values
 function geocodeMarker(address, name, category) {
 	geocoder.geocode({'address': address}, function(results, status) {
   		if (status == 'OK') {
@@ -91,8 +97,9 @@ function geocodeMarker(address, name, category) {
     		alert('Geocode was not successful for the following reason: ' + status);
   		}
 	});
-};
+}
 
+// Active marker animation
 function createAnimation(marker) {
 	marker.addListener('click', function() {
 		if (marker.getAnimation() !== null) {
@@ -102,18 +109,18 @@ function createAnimation(marker) {
         	setTimeout(function(){ marker.setAnimation(null); }, 750);
         }
 	});
-};
+}
 
+// Create marker infowindow
 function createInfoWindow(marker) {
 	var infoWindow = new google.maps.InfoWindow({
-		content: marker.title + ' (' + marker.category + ')' +
-				 "<p>" + marker.description + "</p>"
+		content: marker.title + ' (' + marker.category + ')'
 	});
 
 	marker.addListener('click', function() {
 		infoWindow.open(map, marker);
 	});	
-};
+}
 
 //---------------------------------
 // Wikipedia API
@@ -123,22 +130,21 @@ function wikiAPI(name) {
     var apiURL = 'https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=';
     apiURL += name;
 
+    var $wikiError = $('#wiki-error');
+
     $.ajax({
         url: apiURL, 
         dataType: 'jsonp',
         success: function(response) {
-        	var wikiResult = response['query']['pages'];
-        	var wikiResult = Object.values(wikiResult)[0];
-    		var wikiSummary = wikiResult['extract'];
-
-			for (var i = 0; i < initialLocations.length; i++) {
-				if (initialLocations[i].name == name) {
-					initialLocations[i].description = wikiSummary;
-				};
-        	};
+        	var wikiResult = response.query.pages;
+        	wikiResult = Object.values(wikiResult)[0];
+    		var wikiSummary = wikiResult.extract;
+        },
+        error: function() {
+        	$wikiError.text('Warning: Wikipedia articles failed to load.');
         }
-    });
-};
+    });	
+}
 
 //---------------------------------
 // View Model
@@ -151,11 +157,11 @@ var MapViewModel = function(locations) {
     	return {name: location.name,
     			address: location.address,
     			category: location.category,
-    			description: location.description};    			
+    			description: ''};
     }));
 
     // Observables for drop-down list to filter locations by category
-    self.filters = ko.observableArray(['All', 'Culture', 'Dining', 'Nightlife', 'Other']);
+    self.filters = ko.observableArray(locationCategories);
     self.filter = ko.observable('');
 
     // Filters list of locations shown based on category selection by user
