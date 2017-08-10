@@ -104,6 +104,7 @@ function geocodeMarker(address, name, category) {
 			});
 
 			viewMarkers.push(marker);
+
   		} else {
     		alert('Geocode was not successful for the following reason: ' + status);
   		}
@@ -124,7 +125,6 @@ function createInfoWindow(marker, description) {
 // Wikipedia API
 //---------------------------------
 
-// TODO: Need to pull response into either infowindow or knockout view model
 function wikiAPI(marker) {
     var apiURL = 'https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=';
     apiURL += marker.title;
@@ -138,7 +138,6 @@ function wikiAPI(marker) {
         	var wikiResult = response.query.pages;
         	wikiResult = Object.values(wikiResult)[0];
     		var wikiSummary = wikiResult.extract;
-    		marker.description = wikiSummary;
 
     		createInfoWindow(marker, wikiSummary);
         },
