@@ -90,8 +90,19 @@ function geocodeMarker(address, name, category) {
 	        	animation: google.maps.Animation.DROP
 			});   	
 
-	    	createAnimation(marker);
-	    	createInfoWindow(marker);
+			marker.addListener('click', function() {
+				// Animation
+				if (marker.getAnimation() !== null) {
+		        	marker.setAnimation(null);
+		        } else {
+		        	marker.setAnimation(google.maps.Animation.BOUNCE);
+		        	setTimeout(function(){ marker.setAnimation(null); }, 750);
+		        }
+
+		        // Queries Wikipedia API and creates infowindow with information
+		        wikiAPI(marker);
+			});
+
 			viewMarkers.push(marker);
   		} else {
     		alert('Geocode was not successful for the following reason: ' + status);
@@ -99,36 +110,24 @@ function geocodeMarker(address, name, category) {
 	});
 }
 
-// Active marker animation
-function createAnimation(marker) {
-	marker.addListener('click', function() {
-		if (marker.getAnimation() !== null) {
-        	marker.setAnimation(null);
-        } else {
-        	marker.setAnimation(google.maps.Animation.BOUNCE);
-        	setTimeout(function(){ marker.setAnimation(null); }, 750);
-        }
-	});
-}
-
 // Create marker infowindow
-function createInfoWindow(marker) {
+function createInfoWindow(marker, description) {
 	var infoWindow = new google.maps.InfoWindow({
-		content: marker.title + ' (' + marker.category + ')'
+		content: marker.title + ' (' + marker.category + ')' + 
+				 '<p>' + description + '</p>'
 	});
 
-	marker.addListener('click', function() {
-		infoWindow.open(map, marker);
-	});	
+	infoWindow.open(map, marker);
 }
 
 //---------------------------------
 // Wikipedia API
 //---------------------------------
 
-function wikiAPI(name) {
+// TODO: Need to pull response into either infowindow or knockout view model
+function wikiAPI(marker) {
     var apiURL = 'https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=';
-    apiURL += name;
+    apiURL += marker.title;
 
     var $wikiError = $('#wiki-error');
 
@@ -139,6 +138,9 @@ function wikiAPI(name) {
         	var wikiResult = response.query.pages;
         	wikiResult = Object.values(wikiResult)[0];
     		var wikiSummary = wikiResult.extract;
+    		marker.description = wikiSummary;
+
+    		createInfoWindow(marker, wikiSummary);
         },
         error: function() {
         	$wikiError.text('Warning: Wikipedia articles failed to load.');
