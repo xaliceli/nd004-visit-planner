@@ -26,7 +26,6 @@ var geocoder;
 
 function initMap() {
 
-
 	// Initialize map
 	map = new google.maps.Map(document.getElementById('map'), {
 		center: {lat: 52.5200, lng: 13.4050},
@@ -115,10 +114,20 @@ function geocodeMarker(address, name, category) {
 function createInfoWindow(marker, description) {
 	var infoWindow = new google.maps.InfoWindow({
 		content: marker.title + ' (' + marker.category + ')' + 
-				 '<p>' + description + '</p>'
+				 '<p>' + description + '</p>',
+		maxWidth: 400
 	});
 
 	infoWindow.open(map, marker);
+}
+
+// Animate active marker
+function activeMarker(place) {
+	viewMarkers.forEach(function(marker) {
+		if (marker.title == place) {
+			google.maps.event.trigger(marker, 'click');
+		}
+	});
 }
 
 //---------------------------------
@@ -137,9 +146,17 @@ function wikiAPI(marker) {
         success: function(response) {
         	var wikiResult = response.query.pages;
         	wikiResult = Object.values(wikiResult)[0];
+        	var pageTitle = wikiResult.title;
     		var wikiSummary = wikiResult.extract;
+    		var wikiSummaryShortened = wikiSummary.substring(0, 200);
 
-    		createInfoWindow(marker, wikiSummary);
+    		if (wikiSummaryShortened.slice(-1) != '.') {
+    			wikiSummaryShortened += '...';
+    		}
+
+    		wikiSummaryShortened += '</p><p><a href="https://en.wikipedia.org/wiki/' + pageTitle + '">Read More</a>';
+
+    		createInfoWindow(marker, wikiSummaryShortened);
         },
         error: function() {
         	$wikiError.text('Warning: Wikipedia articles failed to load.');

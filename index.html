@@ -25,10 +25,9 @@
 	        	<select id="category" data-bind="options: filters, value: filter, event: {change: updateMarkers}">
 	          	</select>
 	        </div>
-	        <div id="list" data-bind="foreach: filteredLocations">
-	        	<h3 data-bind="text: name"></h3>
-	        	<h4 data-bind="text: category"></h4>
-	        </div>
+	        <ul id="list" data-bind="foreach: filteredLocations">
+	        	<li><a href="#" data-bind="text: name" onclick="activeMarker(this.innerHTML);"></a></li>
+	        </ul>
 		</section>
 		<footer>
 		</footer>
