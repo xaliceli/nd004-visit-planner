@@ -5,14 +5,6 @@
 // Define locations for markers
 var locationCategories = ['All', 'Culture', 'Dining', 'Nightlife', 'Other'];
 
-var initialLocations = [
-    {name: 'Tresor', address: 'Köpenicker Str. 70, 10179 Berlin, Germany', category: 'Nightlife', description: ''},
-    {name: 'Berghain', address: 'Am Wriezener Bahnhof, 10243 Berlin, Germany', category: 'Nightlife', description: ''},
-    {name: 'East Side Gallery', address: 'Mühlenstraße, 10243 Berlin, Germany', category: 'Culture', description: ''},
-    {name: 'Pergamon Museum', address: 'Pergamonmuseum, 10117 Berlin, Germany', category: 'Culture', description: ''},
-    {name: 'Kaufhaus des Westens', address: 'Tauentzienstraße 21-24, 10789 Berlin, Germany', category: 'Dining', description: ''}    
-];
-
 // Initialize blank array for visible markers 
 var viewMarkers = [];
 
@@ -22,8 +14,11 @@ var viewMarkers = [];
 
 // Define variables in global scope
 var map;
+var infoWindow;
 var geocoder;
+var mapErrorMsg;
 
+// Initialize Google Map
 function initMap() {
 
 	// Initialize map
@@ -32,10 +27,11 @@ function initMap() {
 		zoom: 13
 	});
 
+	infoWindow = new google.maps.InfoWindow({maxWidth: 400}); 
 	geocoder = new google.maps.Geocoder();
 
 	// Create map markers
-	for (i = 0; i < initialLocations.length; i++) {
+	for (i = 0, len = initialLocations.length; i < len; i++) {
 		var address = initialLocations[i].address;
 		var name = initialLocations[i].name;
 		var category = initialLocations[i].category;
@@ -43,38 +39,12 @@ function initMap() {
 		geocodeMarker(address, name, category);
 	}
 
-	// Show all markers
-	document.getElementById('show-all').addEventListener('click', function() {
-		showMarkers(viewMarkers);
-	});
-
-	// Hide all markers
-	document.getElementById('hide-all').addEventListener('click', function() {
-		hideMarkers(viewMarkers);
-	});
 }
 
 // Error handler for Google Maps API load issues
 function errorMap() {
-	$('#map-message').text('Error: API did not return data.');
-}
-
-// Loop through the markers and show them all
-function showMarkers(markers) {
-	var bounds = new google.maps.LatLngBounds();
-	// Extend the boundaries of the map for each marker and display the marker
-	for (var i = 0; i < markers.length; i++) {
-		markers[i].setMap(map);
-		bounds.extend(markers[i].position);
-	}
-	map.fitBounds(bounds);
-}
-
-// Loop through the markers and hide them all
-function hideMarkers(markers) {
-	for (var i = 0; i < markers.length; i++) {
-		markers[i].setMap(null);
-	}
+    var $mapError = $('#map-error');
+	$mapError.text('Warning: Google Maps API failed to load.');
 }
 
 // Create marker by geocoding address into latlong values
@@ -112,33 +82,22 @@ function geocodeMarker(address, name, category) {
 
 // Create marker infowindow
 function createInfoWindow(marker, description) {
-	var infoWindow = new google.maps.InfoWindow({
-		content: marker.title + ' (' + marker.category + ')' + 
-				 '<p>' + description + '</p>',
-		maxWidth: 400
-	});
+	contentString = marker.title + ' (' + marker.category + ')' + 
+				 '<p>' + description + '</p>';
+
+	infoWindow.setContent(contentString);
 
 	infoWindow.open(map, marker);
-}
-
-// Animate active marker
-function activeMarker(place) {
-	viewMarkers.forEach(function(marker) {
-		if (marker.title == place) {
-			google.maps.event.trigger(marker, 'click');
-		}
-	});
 }
 
 //---------------------------------
 // Wikipedia API
 //---------------------------------
 
+// Query Wikipedia API based on title of each marker
 function wikiAPI(marker) {
     var apiURL = 'https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=';
     apiURL += marker.title;
-
-    var $wikiError = $('#wiki-error');
 
     $.ajax({
         url: apiURL, 
@@ -159,6 +118,7 @@ function wikiAPI(marker) {
     		createInfoWindow(marker, wikiSummaryShortened);
         },
         error: function() {
+    		var $wikiError = $('#wiki-error');
         	$wikiError.text('Warning: Wikipedia articles failed to load.');
         }
     });	
@@ -171,6 +131,7 @@ function wikiAPI(marker) {
 var MapViewModel = function(locations) {
 	var self = this;
 
+	// Translate locations into KO observable array
     self.locations = ko.observableArray(ko.utils.arrayMap(locations, function(location) {
     	return {name: location.name,
     			address: location.address,
@@ -207,6 +168,33 @@ var MapViewModel = function(locations) {
 	        }
     	}
     };
+
+    // Animates active marker
+	self.activeMarker = function(place) {
+		viewMarkers.forEach(function(marker) {
+			if (marker.title == place) {
+				google.maps.event.trigger(marker, 'click');
+			}
+		});
+	};
+
+	// Loop through the markers and show them all
+	self.showMarkers = function(markers) {
+		var bounds = new google.maps.LatLngBounds();
+		// Extend the boundaries of the map for each marker and display the marker
+		for (var i = 0; i < markers.length; i++) {
+			markers[i].setMap(map);
+			bounds.extend(markers[i].position);
+		}
+		map.fitBounds(bounds);
+	};
+
+	// Loop through the markers and hide them all
+	self.hideMarkers = function(markers) {
+		for (var i = 0; i < markers.length; i++) {
+			markers[i].setMap(null);
+		}
+	};
 
 };
 

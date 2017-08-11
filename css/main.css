@@ -12,6 +12,10 @@ body {
   padding: 0;
 }
 
+main h1 {
+  font-size: 1.5em;
+}
+
 #menu {
   padding: 0 2%;
 }
@@ -24,7 +28,7 @@ body {
   padding: 0;
 }
 
-#map-wrapper h1 {
+#map-wrapper h1:empty {
   margin: 0;
   padding: 0;
 }
@@ -57,7 +61,8 @@ a:hover {
   color: #000;
 }
 
-#wiki-error {
+#wiki-error,
+#map-error {
   color: red;
 }
 
